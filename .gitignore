@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+d3*.parquet
+v028*.mp4
+dataset_frame_test.mp4

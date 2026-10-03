@@ -1,0 +1,29 @@
+{
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "suite": "libero_spatial",
+  "task_id": 0,
+  "model": "bigbangoslab/pi05_libero_openpiconfig_on_lerobot_chunk30",
+  "max_steps": 280,
+  "protocol": "init_state+10wait",
+  "results": [
+    {
+      "ep": 0,
+      "steps": 87,
+      "success": true,
+      "seconds": 41.6
+    },
+    {
+      "ep": 1,
+      "steps": 88,
+      "success": true,
+      "seconds": 34.9
+    },
+    {
+      "ep": 2,
+      "steps": 90,
+      "success": true,
+      "seconds": 35.8
+    }
+  ],
+  "success_rate": 1.0
+}

@@ -244,27 +244,32 @@ _l2 = np.linalg.norm(preds - truths, axis=1)
 print("每步 L2 误差:", np.round(_l2, 3).tolist())
 print("平均 L2: %.3f | 真实动作幅度均值: %.3f" % (_l2.mean(), np.linalg.norm(truths, axis=1).mean()))""")
 
-code("""# 跑 3 集完整任务 (libero_spatial task 0): 固定初始状态 + 开局 10 步 no-op + 录视频
+code("""# 三个套件各跑 1 个任务 (不同场景/物体/目标), 每任务录一条视频
 import imageio, time
 
-N_EP, MAX_STEPS, N_WAIT = 3, 280, 10
-init_states = suite.get_task_init_states(0)
+MAX_STEPS, N_WAIT = 280, 10
 dummy = np.zeros(7, dtype=np.float64)
 dummy[-1] = -1.0  # 官方 get_libero_dummy_action 同款
+RUN = [("libero_spatial", 0), ("libero_object", 0), ("libero_goal", 0)]
+bench = benchmark.get_benchmark_dict()
 results = []
-for ep in range(N_EP):
+for suite_name, tid in RUN:
+    suite = bench[suite_name]()
+    task = suite.get_task(tid)
+    bddl = os.path.join(get_libero_path("bddl_files"), task.problem_folder, task.bddl_file)
+    env = OffScreenRenderEnv(bddl_file_name=bddl, camera_heights=256, camera_widths=256)
+    init_states = suite.get_task_init_states(tid)
     env.reset()
-    obs = env.set_init_state(init_states[ep % len(init_states)])
+    obs = env.set_init_state(init_states[0])
     policy.reset()
-    frames, t0 = [], time.time()
-    success = False
+    frames, t0, success = [], time.time(), False
     for t in range(MAX_STEPS):
         if t < N_WAIT:
             action = dummy
         else:
             with torch.inference_mode(), torch.autocast("cuda", dtype=torch.float16):
                 a = policy.select_action(pre(make_batch(obs, task.language)))
-            a = post({"action": a})["action"]  # 反归一化到真实动作尺度
+            a = post({"action": a})["action"]
             action = a.squeeze(0).float().cpu().numpy()
         obs, reward, done, info = env.step(action)
         frames.append(obs["agentview_image"][::-1, ::-1].copy())
@@ -272,21 +277,23 @@ for ep in range(N_EP):
             success = True
             break
     dt = time.time() - t0
-    results.append(dict(ep=ep, steps=t + 1, success=success, seconds=round(dt, 1)))
-    print("ep%d: success=%s steps=%d 用时%.0fs" % (ep, success, t + 1, dt))
-    imageio.mimsave("/kaggle/working/pi05_libero_ep%d.mp4" % ep, frames, fps=20)
+    results.append(dict(suite=suite_name, task_id=tid, task=task.language,
+                        success=success, steps=t + 1, seconds=round(dt, 1)))
+    print("%s#%d: success=%s steps=%d 用时%.0fs | %s"
+          % (suite_name, tid, success, t + 1, dt, task.language))
+    imageio.mimsave("/kaggle/working/pi05_libero_%s_%d.mp4" % (suite_name, tid),
+                    frames, fps=20)
+    try:
+        env.close()
+    except Exception:
+        pass
 
 sr = sum(r["success"] for r in results) / len(results)
 print("=" * 40)
 print("成功率: %d/%d (%.0f%%)" % (sum(r["success"] for r in results), len(results), sr * 100))
-json.dump(dict(task=task.language, suite="libero_spatial", task_id=0,
-               model=REPO, max_steps=MAX_STEPS, protocol="init_state+10wait",
+json.dump(dict(model=REPO, protocol="init_state+10wait", max_steps=MAX_STEPS,
                results=results, success_rate=sr),
           open("/kaggle/working/pi05_libero_results.json", "w"), ensure_ascii=False, indent=2)
-try:
-    env.close()
-except Exception:
-    pass
 print("=== 阶段 2 完成 ===")""")
 
 nb = {"cells": CELLS,

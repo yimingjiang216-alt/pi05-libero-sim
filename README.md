@@ -2,7 +2,11 @@
 
 在 Kaggle 免费 T4（16GB）上，用开源 π0.5 视觉-语言-动作模型（LIBERO 微调权重）闭环驱动 LIBERO 基准的 Panda 机械臂，完成桌面取物任务。libero_spatial 第 0 号任务 3 次运行全部成功。
 
-任务指令：*pick up the black bowl between the plate and the ramekin and place it on the plate*
+三个套件各取第 0 号任务（不同场景、物体与目标），每任务一个初始状态、一集：
+
+*libero_spatial #0* — pick up the black bowl between the plate and the ramekin and place it on the plate
+*libero_object #0* — pick up the alphabet soup and place it in the basket
+*libero_goal #0* — open the middle drawer of the cabinet
 
 ## 一、全景：三个组件各管一件事
 
@@ -99,15 +103,15 @@ pip 安装 hf-libero（自带全部任务的 BDDL 与初始状态文件），预
 
 ## 五、结果
 
-| 集 | 结果 | 步数（上限 280） | 用时 |
-|---|---|---|---|
-| ep0 | 成功 | 87 | 42s |
-| ep1 | 成功 | 88 | 35s |
-| ep2 | 成功 | 90 | 36s |
+| 套件 | 任务 | 结果 | 步数（上限 280） | 用时 |
+|---|---|---|---|---|
+| libero_spatial #0 | 黑碗放到盘子上 | 成功 | 85 | 35s |
+| libero_object #0 | 汤罐放进篮子 | 成功 | 148 | 33s |
+| libero_goal #0 | 打开柜子中间抽屉 | 成功 | 134 | 39s |
 
-任务对应演示数据的平均长度约 113 步（10Hz 记录），模型在 20Hz 执行下用 87~90 步完成，节奏合理。成功过程视频见 [`results/`](results/)（agentview 视角），原始指标在 [`results/pi05_libero_results.json`](results/pi05_libero_results.json)。
+三个任务分别考察空间关系理解、不同物体抓取、非抓取型目标（开门抽屉），对应成功视频见 [`results/`](results/)（agentview 视角），原始指标在 [`results/pi05_libero_results.json`](results/pi05_libero_results.json)。
 
-局限：样本量仅 3 集（同任务不同初始状态），不足以估计该任务的真实成功率；未覆盖其余 129 个任务；fp16 与训练所用 bf16 存在数值差异，未单独评估其影响。
+局限：每任务仅 1 集、共 3 集，不足以估计各套件的真实成功率；每个套件还有 9 个任务未覆盖；fp16 与训练所用 bf16 存在数值差异，未单独评估其影响。
 
 ## 六、方法与出处
 

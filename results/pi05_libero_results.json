@@ -1,28 +1,31 @@
 {
-  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
-  "suite": "libero_spatial",
-  "task_id": 0,
   "model": "bigbangoslab/pi05_libero_openpiconfig_on_lerobot_chunk30",
-  "max_steps": 280,
   "protocol": "init_state+10wait",
+  "max_steps": 280,
   "results": [
     {
-      "ep": 0,
-      "steps": 87,
+      "suite": "libero_spatial",
+      "task_id": 0,
+      "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
       "success": true,
-      "seconds": 41.6
+      "steps": 85,
+      "seconds": 35.1
     },
     {
-      "ep": 1,
-      "steps": 88,
+      "suite": "libero_object",
+      "task_id": 0,
+      "task": "pick up the alphabet soup and place it in the basket",
       "success": true,
-      "seconds": 34.9
+      "steps": 148,
+      "seconds": 33.1
     },
     {
-      "ep": 2,
-      "steps": 90,
+      "suite": "libero_goal",
+      "task_id": 0,
+      "task": "open the middle drawer of the cabinet",
       "success": true,
-      "seconds": 35.8
+      "steps": 134,
+      "seconds": 39.2
     }
   ],
   "success_rate": 1.0
